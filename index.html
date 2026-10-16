@@ -18,7 +18,7 @@
   <script src="store/interval.js"></script>
   <script src="store/records.js"></script>
   <script src="store/eventStore.js"></script>
-  <!-- <script src="store/persistence.js"></script> -->
+  <script src="store/persistence.js"></script>
 
   <!-- Conflict -->
   <!-- <script src="conflict/detectConflicts.js"></script> -->
@@ -36,10 +36,16 @@
   <!-- <script src="presentation/weekView.js"></script> -->
 
   <script>
-    // Temporary check that the store loaded. Remove once the UI is in.
+    // Temporary start-up check. The application layer will take this over.
     const store = new SS.EventStore();
+    const persistence = new SS.Persistence(store, {
+      onSaveError: (err) => console.warn(err.message),
+    });
+    const result = persistence.load();
+    window.addEventListener("beforeunload", () => persistence.flush());
     document.getElementById("app").textContent =
-      "Store loaded: " + (typeof SS.EventStore === "function" ? "yes" : "no");
+      "Store loaded: " + result.status + " (" + store.size + " events)" +
+      (result.warning ? " - " + result.warning : "");
   </script>
 </body>
 </html>

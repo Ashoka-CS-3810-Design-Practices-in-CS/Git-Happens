@@ -51,3 +51,20 @@ For ER4, `data.longestGap = { start, end }` (the closest miss shown on screen).
 - Saving: `toData()`, `loadData({ events, tasks })` (all-or-nothing)
 
 Records are frozen. To change one, call `updateEvent` / `updateTask`.
+
+## Persistence API (store/persistence.js)
+`const persistence = new SS.Persistence(store, { onSaved, onSaveError })`
+
+- `load()` once at start-up → `{ status: "loaded" | "empty" | "unavailable" | "corrupt", warning? }`.
+  Show `warning` to the user when present (corrupt data opens an empty calendar).
+- `scheduleSave()` after every change (saves after a 300 ms pause).
+- `flush()` on `beforeunload`.
+- `saveNow()` for the "Try again" button → `{ ok }` or `{ ok: false, error }`.
+- `onSaveError(error)` gets `{ code: "SAVE_FAILED", reason: "QUOTA" | "WRITE" | "UNAVAILABLE" | "SERIALIZE", message }`
+  → show the red "Couldn't save" banner with Try again / Export events.
+- `exportJSON()` → text for the Export events download.
+- `importJSON(text)` → `{ events, tasks, saved }`, or throws `PersistenceError` with code `BAD_IMPORT`
+  (calendar unchanged).
+
+Saved format (localStorage key `smartScheduler.data`):
+`{ app: "smart-scheduler", version: 1, savedAt, events: [...], tasks: [...] }`
