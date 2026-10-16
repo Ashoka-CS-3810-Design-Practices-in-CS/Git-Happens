@@ -248,5 +248,5 @@
     return findBestSlots(task, window, store.eventsIn(window), { ...options, busy });
   }
 
-  return { findBestSlots, findAlternativesFor, findBestSlotsInStore, SchedulingError, formatClock: clock, formatDuration: duration };
+  return { findBestSlots, findAlternativesFor, findBestSlotsInStore, SchedulingError, formatClock: clock, formatDuration: duration, fragments };
 });
