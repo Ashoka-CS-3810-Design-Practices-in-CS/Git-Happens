@@ -1,0 +1,310 @@
+{
+  "app": "smart-scheduler",
+  "version": 1,
+  "savedAt": "2026-10-16T09:00:00.000Z",
+  "focusDay": "2026-10-14",
+  "events": [
+    {
+      "id": "ev_1",
+      "title": "DPCS lecture",
+      "day": "2026-10-12",
+      "start": 600,
+      "end": 690,
+      "description": "",
+      "priority": "high",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_2",
+      "title": "Study group",
+      "day": "2026-10-12",
+      "start": 840,
+      "end": 930,
+      "description": "",
+      "priority": "medium",
+      "category": "meeting",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_3",
+      "title": "Gym",
+      "day": "2026-10-12",
+      "start": 1050,
+      "end": 1110,
+      "description": "",
+      "priority": "low",
+      "category": "personal task",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_4",
+      "title": "Algorithms lecture",
+      "day": "2026-10-13",
+      "start": 600,
+      "end": 690,
+      "description": "",
+      "priority": "high",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_5",
+      "title": "Team sync · Git happens",
+      "day": "2026-10-13",
+      "start": 840,
+      "end": 900,
+      "description": "",
+      "priority": "medium",
+      "category": "meeting",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_6",
+      "title": "Assignment 3 draft",
+      "day": "2026-10-13",
+      "start": 960,
+      "end": 1080,
+      "description": "",
+      "priority": "high",
+      "category": "assignment",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_7",
+      "title": "DPCS lecture",
+      "day": "2026-10-14",
+      "start": 600,
+      "end": 690,
+      "description": "",
+      "priority": "high",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_8",
+      "title": "Meeting with TA",
+      "day": "2026-10-14",
+      "start": 660,
+      "end": 720,
+      "description": "Clash on purpose: 30 min overlap",
+      "priority": "medium",
+      "category": "meeting",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_9",
+      "title": "DPCS lab",
+      "day": "2026-10-14",
+      "start": 840,
+      "end": 960,
+      "description": "",
+      "priority": "high",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_10",
+      "title": "Algorithms lecture",
+      "day": "2026-10-15",
+      "start": 600,
+      "end": 690,
+      "description": "",
+      "priority": "high",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_11",
+      "title": "Office hours",
+      "day": "2026-10-15",
+      "start": 780,
+      "end": 810,
+      "description": "",
+      "priority": "medium",
+      "category": "appointment",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_12",
+      "title": "Dentist",
+      "day": "2026-10-15",
+      "start": 960,
+      "end": 1020,
+      "description": "",
+      "priority": "medium",
+      "category": "appointment",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_13",
+      "title": "DPCS tutorial",
+      "day": "2026-10-16",
+      "start": 540,
+      "end": 630,
+      "description": "",
+      "priority": "medium",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_14",
+      "title": "Submit Assignment 3",
+      "day": "2026-10-16",
+      "start": 1020,
+      "end": 1050,
+      "description": "",
+      "priority": "high",
+      "category": "assignment",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_15",
+      "title": "Gym",
+      "day": "2026-10-16",
+      "start": 1050,
+      "end": 1110,
+      "description": "Back-to-back with the submission: not a clash",
+      "priority": "low",
+      "category": "personal task",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_16",
+      "title": "Groceries",
+      "day": "2026-10-17",
+      "start": 660,
+      "end": 720,
+      "description": "",
+      "priority": "low",
+      "category": "personal task",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_17",
+      "title": "Call home",
+      "day": "2026-10-18",
+      "start": 1080,
+      "end": 1110,
+      "description": "",
+      "priority": "medium",
+      "category": "personal task",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_18",
+      "title": "Hackathon",
+      "day": "2026-10-19",
+      "start": 540,
+      "end": 1080,
+      "description": "Fills the whole working day, so Find a time on Mon 19 gives ER4",
+      "priority": "high",
+      "category": "meeting",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_19",
+      "title": "Exam",
+      "day": "2026-10-20",
+      "start": 600,
+      "end": 720,
+      "description": "",
+      "priority": "high",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_20",
+      "title": "Exam review",
+      "day": "2026-10-20",
+      "start": 600,
+      "end": 720,
+      "description": "Identical times: full 2h overlap",
+      "priority": "medium",
+      "category": "class",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_21",
+      "title": "Lunch",
+      "day": "2026-10-20",
+      "start": 690,
+      "end": 750,
+      "description": "Three events overlapping",
+      "priority": "low",
+      "category": "personal task",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_22",
+      "title": "Early run",
+      "day": "2026-10-21",
+      "start": 0,
+      "end": 15,
+      "description": "Starts at midnight, 15 min long",
+      "priority": "low",
+      "category": "personal task",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_23",
+      "title": "Late study",
+      "day": "2026-10-21",
+      "start": 1380,
+      "end": 1440,
+      "description": "Ends exactly at 24:00",
+      "priority": "medium",
+      "category": "assignment",
+      "sourceTaskId": null
+    },
+    {
+      "id": "ev_24",
+      "title": "Short check-in",
+      "day": "2026-10-22",
+      "start": 780,
+      "end": 795,
+      "description": "The 15-minute minimum",
+      "priority": "low",
+      "category": "meeting",
+      "sourceTaskId": null
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task_25",
+      "name": "Write viva notes",
+      "duration": 90,
+      "priority": "high",
+      "window": null,
+      "deadline": {
+        "day": "2026-10-16",
+        "minute": 1020
+      },
+      "status": "unplaced",
+      "scheduledEventId": null
+    },
+    {
+      "id": "task_26",
+      "name": "Read sweep-line notes",
+      "duration": 45,
+      "priority": "medium",
+      "window": null,
+      "deadline": null,
+      "status": "unplaced",
+      "scheduledEventId": null
+    },
+    {
+      "id": "task_27",
+      "name": "Plan the demo",
+      "duration": 120,
+      "priority": "low",
+      "window": null,
+      "deadline": {
+        "day": "2026-10-23",
+        "minute": 720
+      },
+      "status": "unplaced",
+      "scheduledEventId": null
+    }
+  ]
+}
