@@ -30,23 +30,30 @@
   <script src="scheduling/findBestSlots.js"></script>
 
   <!-- Application -->
-  <!-- <script src="application/validation.js"></script> -->
-  <!-- <script src="application/app.js"></script> -->
+  <script src="application/validation.js"></script>
+  <script src="application/history.js"></script>
+  <script src="application/app.js"></script>
 
   <!-- Presentation (Yashita's week.html code moves here) -->
   <!-- <script src="presentation/weekView.js"></script> -->
 
   <script>
-    // Temporary start-up check. The application layer will take this over.
+    // Start-up. The UI (presentation/) will use `app` for every action.
     const store = new SS.EventStore();
     const persistence = new SS.Persistence(store, {
-      onSaveError: (err) => console.warn(err.message),
+      onSaveError: (err) => console.warn(err.message), // UI: show the "Couldn't save" banner
     });
-    const result = persistence.load();
+    const app = new SS.App(store, {
+      persistence,
+      render: (days, info) => console.log("render", days, info), // UI: redraw these days
+    });
+    const loaded = app.start();
     window.addEventListener("beforeunload", () => persistence.flush());
+    window.app = app; // handy for testing in the browser console
+
     document.getElementById("app").textContent =
-      "Store loaded: " + result.status + " (" + store.size + " events)" +
-      (result.warning ? " - " + result.warning : "");
+      "App started: " + loaded.status + " (" + store.size + " events)" +
+      (loaded.warning ? " - " + loaded.warning : "");
   </script>
 </body>
 </html>

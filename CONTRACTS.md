@@ -95,3 +95,36 @@ ready for the score bars. `reason` is the plain-language sentence for the card.
 Scoring rules and weights are all in `scheduling/scoring.js` (`DEFAULT_CONFIG`):
 deadline urgency fades to 0 over 24 h after the deadline; working hours scores 0 if the slot is
 outside 09:00–18:00 or overlaps a user break; high priority weighs earliness ×1.5, low ×0.5.
+
+## Application API (application/app.js) — what the UI calls
+`const app = new SS.App(store, { persistence, render: (days, info) => redraw(days) })`, then `app.start()`.
+
+Every action returns a plain object. Success: `{ ok: true, message, ... }` (show `message` in the toast).
+Form problems: `{ ok: false, errors: [{ code: "ER1", field, message }] }` (show under that field, keep the form open).
+Scheduling problems: `{ ok: false, error: { code: "ER3" | "ER4", message, data } }`.
+
+| UI action | Call | Extra in the result |
+|---|---|---|
+| Save in the event editor (new) | `app.createEvent(form)` | `event, conflicts, alternatives` |
+| Save in the event editor (edit) | `app.updateEvent(id, form)` | same |
+| While dragging / resizing | `app.dragPreview(id, { day?, start, end })` | `interval, conflicts, clamped` (nothing saved) |
+| Drop after drag / resize | `app.moveEvent(id, { day?, start, end })` | `event, conflicts, clamped` (show "Minimum 15 min" if clamped) |
+| Delete (after the confirm) | `app.deleteEvent(id)` | `taskReturned` |
+| New task form | `app.createTask(form)` | `task` |
+| Find times | `app.findTimes(taskId, { date, start?, end? }, { breaks })` | `window, recommendations` |
+| Add to calendar | `app.acceptSlot(taskId, recommendation)` | `event` |
+| Find another time (clash) | `app.findAnotherTime(eventId)` | `recommendations` |
+| Undo button | `app.undo()` | `message` ("Undone: Delete Gym") |
+| Export / Import | `app.exportCalendar()` / `app.importCalendar(text)` | |
+
+Event form: `{ title, date: "YYYY-MM-DD", start: "HH:MM", end: "HH:MM", description?, priority, category? }`.
+Task form: `{ name, duration (minutes), priority, deadlineDate?, deadlineTime? }`.
+Breaks: `[{ start: "13:00", end: "14:00" }]`. Drag times are minutes.
+
+Reads: `app.store.eventsOn(day)`, `app.store.unplacedTasks()`, `app.conflictsOn(day)`,
+`app.conflictsForEvent(id)`, `app.daysWithConflicts()`, `app.canUndo`, `app.undoLabel`, `app.openSearch`.
+
+`render(days, info)` is called after every change with only the days to redraw.
+`info.type` is start | create | update | move | delete | createTask | deleteTask | accept | undo | import;
+`info.tasksChanged` means redraw the Unplaced tasks list; `info.searchRefreshed` means redraw the Find a time results
+from `app.openSearch.result`.

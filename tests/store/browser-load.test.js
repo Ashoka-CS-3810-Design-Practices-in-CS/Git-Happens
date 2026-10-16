@@ -11,7 +11,8 @@ const vm = require("node:vm");
 
 const ORDER = ["store/interval.js", "store/records.js", "store/eventStore.js", "store/persistence.js",
   "conflict/minHeap.js", "conflict/detectConflicts.js",
-  "scheduling/intervals.js", "scheduling/scoring.js", "scheduling/findBestSlots.js"];
+  "scheduling/intervals.js", "scheduling/scoring.js", "scheduling/findBestSlots.js",
+  "application/validation.js", "application/history.js", "application/app.js"];
 
 test("all scripts load as plain browser scripts and attach to window.SS", () => {
   const context = vm.createContext({});
@@ -39,4 +40,9 @@ test("all scripts load as plain browser scripts and attach to window.SS", () => 
   const recs = context.SS.findBestSlotsInStore(s, { duration: 60, priority: "low", deadline: null },
     { day: "2026-10-14", start: 540, end: 1080 });
   assert.ok(recs.length > 0);
+
+  // the application layer loads too
+  const app = new context.SS.App(new EventStore());
+  app.start();
+  assert.equal(app.createEvent({ title: "z", date: "2026-10-14", start: "10:00", end: "11:00", priority: "low" }).ok, true);
 });
