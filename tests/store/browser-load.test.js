@@ -9,9 +9,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const ORDER = ["store/interval.js", "store/records.js", "store/eventStore.js", "store/persistence.js"];
+const ORDER = ["store/interval.js", "store/records.js", "store/eventStore.js", "store/persistence.js",
+  "conflict/minHeap.js", "conflict/detectConflicts.js"];
 
-test("store files load as plain browser scripts and attach to window.SS", () => {
+test("all scripts load as plain browser scripts and attach to window.SS", () => {
   const context = vm.createContext({});
   context.window = context;
   for (const file of ORDER) {
@@ -28,4 +29,8 @@ test("store files load as plain browser scripts and attach to window.SS", () => 
   // persistence loads too; with no localStorage in this context it reports unavailable
   const p = new context.SS.Persistence(s);
   assert.equal(p.load().status, "unavailable");
+
+  // conflict detection loads too
+  s.addEvent(createEvent({ title: "y", day: "2026-10-14", start: 630, end: 700, priority: "low" }));
+  assert.equal(context.SS.detectConflicts(s.eventsOn("2026-10-14")).length, 1);
 });

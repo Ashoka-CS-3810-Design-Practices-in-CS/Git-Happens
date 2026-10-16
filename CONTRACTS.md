@@ -68,3 +68,13 @@ Records are frozen. To change one, call `updateEvent` / `updateTask`.
 
 Saved format (localStorage key `smartScheduler.data`):
 `{ app: "smart-scheduler", version: 1, savedAt, events: [...], tasks: [...] }`
+
+## Conflict API (conflict/detectConflicts.js)
+- `SS.detectConflicts(store.eventsOn(day))` → every Conflict on that day, sorted by overlapStart.
+- `SS.conflictsFor(proposedEvent, store.eventsOn(day))` → conflicts for one event only, O(n).
+  Use while dragging; skips the event's own id.
+- `SS.conflictsInvolving(conflicts, id)` → the ones that include that event (for the outline / pop-up).
+
+Conflict: `{ eventA, eventB, overlapStart, overlapEnd, overlapMinutes }`.
+`eventA` starts first. Shade minutes `overlapStart`–`overlapEnd` with stripes; label with `overlapMinutes`.
+Touching events are never conflicts.
