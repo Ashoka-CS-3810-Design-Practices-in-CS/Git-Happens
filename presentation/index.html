@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clear: week view</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  /* Page layout for the week screen. Components come from components.css; this is only the frame around them. */
+  body { margin: 0; }
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); padding: 14px var(--space-5); border-bottom: 1px solid var(--line); }
+  .bar__title { display: flex; align-items: baseline; gap: var(--space-2); flex: 1 1 240px; margin: 0; }
+  .bar__year { font-weight: 400; color: var(--caption); }
+  .bar__right { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 240px; justify-content: flex-end; }
+  .search { display: flex; align-items: center; gap: var(--space-2); background: var(--surface-2); border-radius: var(--radius-lg); padding: 0 12px; height: var(--control-height); color: var(--muted); margin-left: var(--space-2); }
+  .search input { border: 0; background: transparent; font: inherit; font-size: 13px; width: 120px; outline: none; color: var(--text); }
+
+  .body { display: flex; flex-wrap: wrap; flex: 1; }
+  .side { flex: 1 1 232px; max-width: 280px; background: var(--surface); border-right: 1px solid var(--line); padding: 20px; display: flex; flex-direction: column; gap: 28px; }
+  .side section { display: flex; flex-direction: column; gap: 10px; }
+  .side__overline { color: var(--muted); }
+  .mini__week { background: #ececef; }
+  .cal { display: flex; align-items: center; gap: 10px; font-size: 13px; min-height: 28px; }
+  .cal input { width: 16px; height: 16px; margin: 0; }
+  .task { background: var(--bg); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: var(--space-2); box-shadow: var(--shadow-card); }
+  .task__head { display: flex; justify-content: space-between; gap: var(--space-2); font-size: 13px; font-weight: 600; }
+  .task__pri { font-size: 12px; color: var(--muted); }
+  .task__pri--high { color: var(--conflict); }
+  .task__meta { font-size: 12px; color: var(--muted); }
+  .task__link { font-size: 13px; font-weight: 600; text-decoration: none; padding: 6px 0; color: var(--accent); }
+  .task__link:hover { color: var(--accent-ink); }
+
+  .main { flex: 999 1 560px; min-width: 0; overflow-x: auto; }
+  .week { min-width: 880px; padding: 0 16px 24px 0; }
+  .head { display: grid; grid-template-columns: 64px repeat(7, minmax(0, 1fr)); position: sticky; top: 0; background: var(--bg); z-index: 5; }
+  .head div { display: flex; align-items: center; gap: 6px; padding: 14px 8px 10px; font-size: 13px; color: var(--muted); }
+  .num { min-width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: var(--radius-pill); font-weight: 600; font-size: 15px; color: var(--text); }
+  .num.today { background: var(--accent); color: #fff; }
+  .cl-event.is-conflict { box-shadow: inset 0 0 0 1.5px var(--conflict); }
+  .cl-slot { flex-direction: column; gap: 1px; left: 3px; right: 3px; z-index: 2; }
+  .cl-slot span + span { font-weight: 400; }
+  .cl-popover { position: absolute; top: 250px; left: 30%; z-index: 4; }
+</style>
+</head>
+<body class="cl-root">
+<div class="app">
+
+  <header class="bar">
+    <h1 class="bar__title t-view-title">October <span class="bar__year">2026</span></h1>
+    <div class="cl-seg" role="group" aria-label="View">
+      <button class="cl-seg__item" aria-pressed="false">Day</button>
+      <button class="cl-seg__item" aria-pressed="true">Week</button>
+      <button class="cl-seg__item" aria-pressed="false">Month</button>
+    </div>
+    <div class="bar__right">
+      <button class="cl-btn cl-btn--ghost cl-btn--icon" aria-label="Previous week">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button class="cl-btn cl-btn--secondary">Today</button>
+      <button class="cl-btn cl-btn--ghost cl-btn--icon" aria-label="Next week">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <label class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input placeholder="Search" aria-label="Search events">
+      </label>
+      <button class="cl-btn cl-btn--primary cl-btn--icon" id="add" aria-label="New event">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="body">
+    <aside class="side">
+      <section aria-label="Mini month">
+        <div class="t-label" style="font-weight:600">October 2026</div>
+        <div class="cl-mini" id="mini"></div>
+      </section>
+
+      <section>
+        <div class="t-overline side__overline">Calendars</div>
+        <div id="cals"></div>
+      </section>
+
+      <section>
+        <div class="t-overline side__overline">Unplaced tasks</div>
+        <div class="task">
+          <div class="task__head"><span>Write viva notes</span><span class="task__pri task__pri--high">High</span></div>
+          <div class="task__meta">1h 30m · due Fri 16, 17:00</div>
+          <a class="task__link" href="#">Find a time</a>
+        </div>
+        <div class="task">
+          <div class="task__head"><span>Read sweep-line notes</span><span class="task__pri">Medium</span></div>
+          <div class="task__meta">45m · no deadline</div>
+          <a class="task__link" href="#">Find a time</a>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <div class="week">
+        <div class="head" id="head"><div></div></div>
+        <div class="cl-grid" id="grid" style="--hours:11; border-top:1px solid var(--line)"></div>
+      </div>
+    </main>
+  </div>
+</div>
+<div class="cl-toast-region" id="toasts" aria-live="polite"></div>
+
+<script>
+// Sample data only. Times are integer minutes from midnight; intervals are half-open [start, end).
+const GRID_START = 480; // the grid starts at 08:00
+const NOW = 642;        // 10:42 on the "today" column
+const CATS = {
+  class: 'Class', meeting: 'Meeting', appointment: 'Appointment', assignment: 'Assignment', personal: 'Personal task'
+};
+const days = [
+  { dow: 'Mon', d: 12, events: [['DPCS lecture', 600, 690, 'class'], ['Study group', 840, 930, 'meeting'], ['Gym', 1050, 1110, 'personal']] },
+  { dow: 'Tue', d: 13, events: [['Algorithms lecture', 600, 690, 'class'], ['Team sync · Git happens', 840, 900, 'meeting'], ['Assignment 3 draft', 960, 1080, 'assignment']] },
+  { dow: 'Wed', d: 14, today: true, events: [['DPCS lecture', 600, 690, 'class'], ['Meeting with TA', 660, 720, 'meeting'], ['DPCS lab', 840, 960, 'class']] },
+  { dow: 'Thu', d: 15, events: [['Algorithms lecture', 600, 690, 'class'], ['Office hours', 780, 810, 'appointment'], ['Dentist', 960, 1020, 'appointment']],
+    suggested: [['Write viva notes', 690, 780]] },
+  { dow: 'Fri', d: 16, events: [['DPCS tutorial', 540, 630, 'class'], ['Submit Assignment 3', 1020, 1050, 'assignment'], ['Gym', 1050, 1110, 'personal']] },
+  { dow: 'Sat', d: 17, events: [['Groceries', 660, 720, 'personal']] },
+  { dow: 'Sun', d: 18, events: [['Call home', 1080, 1110, 'personal']] }
+];
+
+const fmt = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+const hourLabel = (h) => (h > 12 ? h - 12 : h) + (h >= 12 ? ' PM' : ' AM');
+const el = (tag, cls, attrs = {}) => Object.assign(document.createElement(tag), cls ? { className: cls } : {}, attrs);
+
+// Mini month: Monday first. October 2026 starts on a Thursday.
+const mini = document.getElementById('mini');
+for (const d of ['M', 'T', 'W', 'T', 'F', 'S', 'S']) mini.append(el('span', 'cl-mini__dow', { textContent: d }));
+for (let i = 0; i < 35; i++) {
+  const n = i < 3 ? 28 + i : i < 34 ? i - 2 : 1;
+  const out = i < 3 || i >= 34;
+  const cell = el('div', i >= 14 && i <= 20 ? 'mini__week' : '', { style: 'padding:2px 0' });
+  const b = el('button', 'cl-mini__day' + (out ? ' is-out' : ''), { textContent: n, style: 'width:24px;height:24px;line-height:24px' });
+  if (i === 16) b.setAttribute('aria-current', 'date');
+  cell.append(b);
+  mini.append(cell);
+}
+
+// Calendar filters, one per category.
+const cals = document.getElementById('cals');
+for (const [key, label] of Object.entries(CATS)) {
+  const l = el('label', 'cal');
+  l.append(el('input', '', { type: 'checkbox', checked: true, style: `accent-color: var(--cat-${key}-dot)` }), el('span', '', { textContent: label }));
+  cals.append(l);
+}
+
+// Presentation only: lanes for overlapping events and overlap bands.
+// The real conflict list comes from the Conflict layer's sweep line; this is a stand-in for the mockup.
+function layout(events) {
+  const evs = events.map(([title, s, e, cat]) => ({ title, s, e, cat })).sort((a, b) => a.s - b.s);
+  const overlaps = [];
+  for (let i = 0; i < evs.length; i++)
+    for (let j = i + 1; j < evs.length && evs[j].s < evs[i].e; j++) {
+      overlaps.push({ a: evs[i], b: evs[j], s: evs[j].s, e: Math.min(evs[i].e, evs[j].e) });
+      evs[i].lane = 0; evs[j].lane = 1; evs[i].lanes = evs[j].lanes = 2;
+      evs[i].conflict = evs[j].conflict = true;
+    }
+  return { evs, overlaps };
+}
+
+const head = document.getElementById('head');
+const grid = document.getElementById('grid');
+const hours = el('div', 'cl-hours');
+for (let h = 9; h <= 18; h++) hours.append(el('div', 'cl-hours__label', { textContent: hourLabel(h), style: `top:${h * 60 - GRID_START}px` }));
+grid.append(hours);
+
+for (const day of days) {
+  const h = el('div');
+  h.append(day.dow, el('span', 'num' + (day.today ? ' today' : ''), { textContent: day.d }));
+  head.append(h);
+
+  const col = el('div', 'cl-col' + (day.d >= 17 ? ' cl-col--weekend' : ''));
+  const { evs, overlaps } = layout(day.events);
+  for (const ev of evs) {
+    // Overlapping pairs sit side by side, slightly overlapping (52% wide), as in the mockup.
+    const w = ev.lanes ? 52 : 100, left = ev.lane ? 48 : 0;
+    const b = el('button', 'cl-event' + (ev.conflict ? ' is-conflict' : ''));
+    b.dataset.cat = ev.cat;
+    b.style.cssText = `top:${ev.s - GRID_START + 1}px;height:${ev.e - ev.s - 2}px;left:calc(${left}% + 3px);width:calc(${w}% - 6px)`;
+    const other = overlaps.find((o) => o.a === ev || o.b === ev);
+    b.setAttribute('aria-label', `${ev.title}, ${day.dow} ${day.d} October, ${fmt(ev.s)} to ${fmt(ev.e)}` +
+      (other ? `. Overlaps ${(other.a === ev ? other.b : other.a).title} by ${other.e - other.s} minutes.` : ''));
+    b.append(el('span', 'cl-event__title', { textContent: ev.title }));
+    if (ev.e - ev.s > 45) b.append(el('span', 'cl-event__time', { textContent: `${fmt(ev.s)} – ${fmt(ev.e)}` }));
+    col.append(b);
+  }
+  for (const o of overlaps) {
+    col.append(el('div', 'cl-overlap', { style: `top:${o.s - GRID_START}px;height:${o.e - o.s}px` }));
+    const pop = el('div', 'cl-popover', { role: 'dialog' });
+    pop.setAttribute('aria-label', 'Overlap');
+    pop.innerHTML = `<div class="cl-popover__title cl-popover__title--conflict">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg>
+        Overlap · ${o.e - o.s} min</div>
+      <p class="cl-popover__body">${o.b.title} overlaps ${o.a.title} from ${fmt(o.s)} to ${fmt(o.e)}. Both events are kept.</p>
+      <div class="cl-popover__actions"><button class="cl-btn cl-btn--ink">Find another time</button><button class="cl-btn cl-btn--secondary">Keep</button></div>`;
+    col.append(pop);
+  }
+  for (const [title, s, e] of day.suggested || []) {
+    const a = el('a', 'cl-slot', { href: '#', style: `top:${s - GRID_START + 1}px;height:${e - s - 2}px` });
+    a.append(el('span', '', { textContent: title }), el('span', '', { textContent: `${fmt(s)} – ${fmt(e)} · suggested` }));
+    col.append(a);
+  }
+  if (day.today) col.append(el('div', 'cl-now', { style: `top:${NOW - GRID_START}px` }));
+  grid.append(col);
+}
+
+// Success feedback: one toast at a time, 5 s (8 s with an action).
+function toast(text, action) {
+  const region = document.getElementById('toasts');
+  region.replaceChildren();
+  const t = el('div', 'cl-toast', { role: 'status' });
+  t.innerHTML = '<svg class="cl-toast__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  t.append(el('span', 'cl-toast__text', { textContent: text }));
+  if (action) t.append(el('button', 'cl-toast__action', { textContent: action }));
+  region.append(t);
+  setTimeout(() => t.remove(), action ? 8000 : 5000);
+}
+document.getElementById('add').addEventListener('click', () => toast('Event added', 'Undo'));
+</script>
+</body>
+</html>
