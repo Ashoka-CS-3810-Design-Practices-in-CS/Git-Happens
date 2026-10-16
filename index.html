@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Scheduler</title>
+</head>
+<body>
+  <div id="app">Smart Scheduler is loading…</div>
+
+  <!--
+    Plain scripts, loaded in layer order (dependencies first), so the app
+    opens by double-clicking this file. No server, no import/export.
+    Every file attaches its functions to window.SS.
+  -->
+
+  <!-- Store / Domain -->
+  <script src="store/interval.js"></script>
+  <script src="store/records.js"></script>
+  <script src="store/eventStore.js"></script>
+  <script src="store/persistence.js"></script>
+
+  <!-- Conflict -->
+  <script src="conflict/minHeap.js"></script>
+  <script src="conflict/detectConflicts.js"></script>
+
+  <!-- Scheduling -->
+  <script src="scheduling/intervals.js"></script>
+  <script src="scheduling/scoring.js"></script>
+  <script src="scheduling/findBestSlots.js"></script>
+
+  <!-- Application -->
+  <script src="application/validation.js"></script>
+  <script src="application/history.js"></script>
+  <script src="application/app.js"></script>
+
+  <!-- Presentation (Yashita's week.html code moves here) -->
+  <!-- <script src="presentation/weekView.js"></script> -->
+
+  <script>
+    // Start-up. The UI (presentation/) will use `app` for every action.
+    const store = new SS.EventStore();
+    const persistence = new SS.Persistence(store, {
+      onSaveError: (err) => console.warn(err.message), // UI: show the "Couldn't save" banner
+    });
+    const app = new SS.App(store, {
+      persistence,
+      render: (days, info) => console.log("render", days, info), // UI: redraw these days
+    });
+    const loaded = app.start();
+    window.addEventListener("beforeunload", () => persistence.flush());
+    window.app = app; // handy for testing in the browser console
+
+    document.getElementById("app").textContent =
+      "App started: " + loaded.status + " (" + store.size + " events)" +
+      (loaded.warning ? " - " + loaded.warning : "");
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "smart-scheduler",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Smart Scheduler - DPCS Project 4 (team Git happens)",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
