@@ -10,7 +10,8 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ORDER = ["store/interval.js", "store/records.js", "store/eventStore.js", "store/persistence.js",
-  "conflict/minHeap.js", "conflict/detectConflicts.js"];
+  "conflict/minHeap.js", "conflict/detectConflicts.js",
+  "scheduling/intervals.js", "scheduling/scoring.js", "scheduling/findBestSlots.js"];
 
 test("all scripts load as plain browser scripts and attach to window.SS", () => {
   const context = vm.createContext({});
@@ -33,4 +34,9 @@ test("all scripts load as plain browser scripts and attach to window.SS", () => 
   // conflict detection loads too
   s.addEvent(createEvent({ title: "y", day: "2026-10-14", start: 630, end: 700, priority: "low" }));
   assert.equal(context.SS.detectConflicts(s.eventsOn("2026-10-14")).length, 1);
+
+  // scheduling loads too
+  const recs = context.SS.findBestSlotsInStore(s, { duration: 60, priority: "low", deadline: null },
+    { day: "2026-10-14", start: 540, end: 1080 });
+  assert.ok(recs.length > 0);
 });

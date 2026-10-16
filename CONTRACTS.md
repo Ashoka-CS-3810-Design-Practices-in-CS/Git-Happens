@@ -78,3 +78,20 @@ Saved format (localStorage key `smartScheduler.data`):
 Conflict: `{ eventA, eventB, overlapStart, overlapEnd, overlapMinutes }`.
 `eventA` starts first. Shade minutes `overlapStart`–`overlapEnd` with stripes; label with `overlapMinutes`.
 Touching events are never conflicts.
+
+## Scheduling API (scheduling/)
+- `SS.findBestSlotsInStore(store, task, window, { breaks })` → up to 3 Recommendations, best first.
+  `window` is `{ day, start, end }`; default it to working hours 09:00–18:00 (540–1080).
+  `breaks` is the user's breaks, e.g. `[{ start: 780, end: 840 }]` for lunch 13:00–14:00.
+- `SS.findAlternativesFor(event, store.eventsOn(day), window)` → for "Find another time" on a clash.
+- Throws `SchedulingError`:
+  - `ER3` (window shorter than task): `data = { windowMinutes, durationMinutes }`
+  - `ER4` (no slot): `data = { longestGap: { start, end } | null, durationMinutes, window }`
+- `SS.formatClock(570)` → `"09:30"`, `SS.formatDuration(90)` → `"1h 30m"`.
+
+Recommendation also has `day`. `scoreTotal` and the four `scoreBreakdown` values are 0–1 (two decimals),
+ready for the score bars. `reason` is the plain-language sentence for the card.
+
+Scoring rules and weights are all in `scheduling/scoring.js` (`DEFAULT_CONFIG`):
+deadline urgency fades to 0 over 24 h after the deadline; working hours scores 0 if the slot is
+outside 09:00–18:00 or overlaps a user break; high priority weighs earliness ×1.5, low ×0.5.
