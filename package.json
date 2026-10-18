@@ -4,9 +4,12 @@
   "private": true,
   "description": "Smart Scheduler - DPCS Project 4 (team Git happens)",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=tests/** --test-coverage-exclude=scripts/**",
+    "test:mutation": "node scripts/mutants.js",
+    "perf": "node scripts/perf.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

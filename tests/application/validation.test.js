@@ -69,4 +69,6 @@ test("clampDrag: snaps to 15 and stops at the 15-minute minimum without an error
   assert.deepEqual(V.clampDrag({ start: 607, end: 668 }), { start: 600, end: 675, clamped: false });
   assert.deepEqual(V.clampDrag({ start: 600, end: 590 }), { start: 600, end: 615, clamped: true });
   assert.deepEqual(V.clampDrag({ start: 1435, end: 1500 }), { start: 1425, end: 1440, clamped: false });
+  // end rounds down onto the start (10:07 -> 10:00): must still come out 15 minutes long
+  assert.deepEqual(V.clampDrag({ start: 600, end: 607 }), { start: 600, end: 615, clamped: true });
 });
