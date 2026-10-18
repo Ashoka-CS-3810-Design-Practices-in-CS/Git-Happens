@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="presentation/tokens.css">
+  <link rel="stylesheet" href="presentation/components.css">
+  <link rel="stylesheet" href="presentation/app.css">
+</head>
+<body class="cl-root">
+<a class="sr-only" href="#main">Skip to calendar</a>
+<div class="app">
+  <header class="bar">
+    <button class="cl-btn cl-btn--ghost cl-btn--icon bar__menu" id="menu" aria-label="Show sidebar" aria-expanded="false" aria-controls="side">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <h1 class="bar__title t-view-title" id="title" aria-live="polite">Calendar</h1>
+    <div class="cl-seg" role="group" aria-label="View">
+      <button class="cl-seg__item" data-view="day" aria-pressed="false" title="Day (D)">Day</button>
+      <button class="cl-seg__item" data-view="week" aria-pressed="true" title="Week (W)">Week</button>
+      <button class="cl-seg__item" data-view="month" aria-pressed="false" title="Month (M)">Month</button>
+    </div>
+    <div class="bar__right">
+      <button class="cl-btn cl-btn--ghost cl-btn--icon" id="prev" aria-label="Previous">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button class="cl-btn cl-btn--secondary" id="today" title="Today (T)">Today</button>
+      <button class="cl-btn cl-btn--ghost cl-btn--icon" id="next" aria-label="Next">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="search" placeholder="Search" aria-label="Search events" autocomplete="off">
+        <div class="search__results" id="search-results" hidden></div>
+      </div>
+      <button class="cl-btn cl-btn--primary cl-btn--icon" id="add-top" aria-label="New event" title="New event (N)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="banners"></div>
+
+  <div class="body">
+    <div class="scrim" id="scrim"></div>
+    <aside class="side" id="side" aria-label="Sidebar">
+      <section id="mini" aria-label="Mini month"></section>
+
+      <section>
+        <div class="t-overline side__overline">Calendars</div>
+        <div id="cals"></div>
+      </section>
+
+      <section>
+        <div class="t-overline side__overline">Unplaced tasks
+          <button class="cl-btn cl-btn--ghost" id="new-task">+ New task</button>
+        </div>
+        <div id="tasks"></div>
+      </section>
+
+      <section>
+        <div class="t-overline side__overline">Data</div>
+        <div class="side__tools">
+          <button class="cl-btn cl-btn--secondary" id="export">Export</button>
+          <button class="cl-btn cl-btn--secondary" id="import">Import</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden>
+        </div>
+        <p class="muted">Shortcuts: N new event, F find a time, T today, D / W / M views, ← → move through dates, / search, Esc close. On an event: Alt+arrows move it, Alt+Shift+↑↓ resize, Delete deletes.</p>
+      </section>
+    </aside>
+
+    <main class="main" id="main" tabindex="-1" aria-label="Calendar"></main>
+
+    <aside class="panel" id="panel" hidden></aside>
+  </div>
+
+  <nav class="tabs" aria-label="Views">
+    <button data-view="day" aria-pressed="false">Day</button>
+    <button data-view="week" aria-pressed="false">Week</button>
+    <button data-view="month" aria-pressed="false">Month</button>
+    <button id="tab-tasks">Tasks</button>
+  </nav>
+  <button class="cl-btn cl-btn--primary fab" id="fab" aria-label="New event">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+</div>
+<div class="cl-toast-region" id="toasts" aria-live="polite"></div>
+<div class="sr-only" id="announce" aria-live="polite"></div>
+
+<!--
+  Plain scripts, loaded in layer order (dependencies first), so the app
+  opens by double-clicking this file. No server, no import/export.
+  Every logic file attaches its functions to window.SS.
+-->
+
+<!-- Store / Domain -->
+<script src="store/interval.js"></script>
+<script src="store/records.js"></script>
+<script src="store/eventStore.js"></script>
+<script src="store/persistence.js"></script>
+
+<!-- Conflict -->
+<script src="conflict/minHeap.js"></script>
+<script src="conflict/detectConflicts.js"></script>
+
+<!-- Scheduling -->
+<script src="scheduling/intervals.js"></script>
+<script src="scheduling/scoring.js"></script>
+<script src="scheduling/findBestSlots.js"></script>
+
+<!-- Application -->
+<script src="application/validation.js"></script>
+<script src="application/history.js"></script>
+<script src="application/app.js"></script>
+
+<!-- Presentation -->
+<script src="presentation/time.js"></script>
+<script src="presentation/ui.js"></script>
+<script src="presentation/service.js"></script>
+<script src="presentation/views.js"></script>
+<script src="presentation/drag.js"></script>
+<script src="presentation/editor.js"></script>
+<script src="presentation/find-time.js"></script>
+<script src="presentation/app.js"></script>
+
+<script>
+  // Start-up. The screens (presentation/) use `app` for every action.
+  const store = new SS.EventStore();
+  const persistence = new SS.Persistence(store, {
+    onSaved: () => Screens.saved(),
+    onSaveError: (err) => Screens.saveFailed(err), // shows the "Couldn't save" banner
+  });
+  const app = new SS.App(store, {
+    persistence,
+    render: (days, info) => Screens.render(days, info), // redraws these days
+  });
+  Screens.start(app, persistence); // draws the page, then calls app.start()
+  window.addEventListener("beforeunload", () => persistence.flush());
+  window.app = app; // handy for testing in the browser console
+</script>
+</body>
+</html>
