@@ -1,17 +1,17 @@
 /**
  * application/app.js
  *
- * The Application layer (Assignment 2 section 5). The UI calls only this.
+ * The Application layer. The UI calls only this.
  *
- *   - Validates input before anything is changed (ER1).
- *   - Runs Flows A-D: create, edit/move/resize, schedule a task, delete.
- *   - After every change runs ONE pipeline (Algorithm 5):
+ *   - Validates input before anything is changed.
+ *   - Runs Flows A-D which are create, edit/move/resize, schedule a task, delete.
+ *   - After every change runs one pipeline:
  *       affected days -> invalidate caches -> recheck conflicts ->
  *       refresh open suggestions -> schedule a save -> render(days)
  *   - Keeps the undo history.
  *   - Turns ER3 / ER4 from Scheduling into plain error objects.
  *
- * Every action returns a plain result object; nothing here touches the DOM.
+ * Every action returns a plain result object
  *   success: { ok: true, message, ... }
  *   failure: { ok: false, errors: [{ code, field?, message }] }   (ER1, NOT_FOUND)
  *        or: { ok: false, error: { code, message, data } }        (ER3, ER4)
@@ -57,7 +57,7 @@
     throw e;
   }
 
-  /** Only the editable fields of an event (used to restore it on undo). */
+  /** Only the editable fields of an event (used to restore it in case of undo). */
   function editableFields(ev) {
     return { title: ev.title, day: ev.day, start: ev.start, end: ev.end,
       description: ev.description, priority: ev.priority, category: ev.category };
@@ -70,13 +70,13 @@
     #history;
     #workingHours;
     #conflicts = new Map(); // day -> Conflict[]
-    #search = null; // the open "Find a time" search, kept fresh after changes
+    #search = null; // the open "Find a time" search
 
     /**
-     * @param {EventStore} store
+     * @param {EventStore} store is where all the events are kept while the page is open.
      * @param {object} [options]
-     *   persistence   a Persistence (optional; without it nothing is saved)
-     *   render        (days: string[], info: object) => void, called after every change
+     *   persistence   a Persistence (optional; without it nothing is saved after a refresh)
+     *   render        (days: string[], info: object) => void, called after every change so the screen can reflect the new changes
      *   workingHours  { start, end } in minutes, default 09:00-18:00
      */
     constructor(store, options = {}) {
@@ -87,7 +87,7 @@
       this.#workingHours = options.workingHours || { start: 540, end: 1080 };
     }
 
-    /** Read-only access for the UI: eventsOn, getEvent, unplacedTasks, ... */
+    /** Read-only access for the UI */
     get store() {
       return this.#store;
     }
@@ -110,18 +110,18 @@
 
     // ============================================================ reads
 
-    /** All conflicts on a day (for stripes and outlines). */
+    /** All conflicts on a day. */
     conflictsOn(day) {
       return (this.#conflicts.get(day) || []).slice();
     }
 
-    /** Conflicts involving one event (for the pop-up and editor box). */
+    /** Conflicts involving one event. */
     conflictsForEvent(id) {
       const ev = this.#store.getEvent(id);
       return ev ? conflictsInvolving(this.conflictsOn(ev.day), id) : [];
     }
 
-    /** Days that currently have at least one conflict (month view "1 overlap"). */
+    /** Days that currently have at least one conflict. */
     daysWithConflicts() {
       return Array.from(this.#conflicts.keys()).sort();
     }
@@ -158,9 +158,9 @@
       return this.#eventResult(ev, "Event added");
     }
 
-    // ============================================================ Flow B: edit / move / resize
+    // edit / move / resize
 
-    /** Edit an event from the editor form. Bad input -> ER1, nothing changes. */
+    /** Edit an event from the editor form. Bad input -> ER1, nothing changes in the application. */
     updateEvent(id, form) {
       if (!this.#store.hasEvent(id)) return notFound("event");
       const v = validateEventForm(form);
@@ -170,7 +170,7 @@
 
     /**
      * Drag to move or resize: { day?, start, end } in minutes.
-     * Never errors: snaps to 15 minutes and stops at the 15-minute minimum.
+     * snaps to 15 minutes and stops at the 15-minute minimum.
      * Result has clamped: true when the "Minimum 15 min" hint should show.
      */
     moveEvent(id, proposed) {
@@ -185,7 +185,6 @@
 
     /**
      * While dragging: quick O(n) check of the moved event only, nothing saved
-     * (Assignment 3 section 4.5). Call moveEvent when the user lets go.
      */
     dragPreview(id, proposed) {
       const ev = this.#store.getEvent(id);
@@ -206,7 +205,7 @@
       return this.#eventResult(after, messageFor(after));
     }
 
-    // ============================================================ Flow D: delete
+    // delete
 
     /** Delete an event. If it came from a task, the task goes back to Unplaced. */
     deleteEvent(id) {
@@ -230,7 +229,7 @@
       return { ok: true, event: ev, taskReturned: !!taskBefore, message: `Deleted ${ev.title}` };
     }
 
-    // ============================================================ tasks
+    // tasks
 
     /** Create a flexible task from the New task form. */
     createTask(form) {
@@ -359,10 +358,10 @@
       }
     }
 
-    // ============================================================ pipeline
+    // pipeline
 
     /**
-     * Algorithm 5. One path for every change, so what the UI shows always
+     * One path for every change, so what the UI shows always
      * matches the current events.
      */
     #recompute(days, info) {
