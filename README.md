@@ -17,5 +17,7 @@ each attaches its functions to `window.SS` in the browser and uses
 ## UML diagrams
 ### Use-case diagram
 <img width="1265" height="892" alt="use case uml" src="https://github.com/user-attachments/assets/6dd65b37-7fd1-4356-978b-81f27381faba" />
+
+
 ### Class diagram
 <img width="1209" height="912" alt="class diagram" src="https://github.com/user-attachments/assets/c528de47-96e3-457a-b82e-e9557df0dad5" />
